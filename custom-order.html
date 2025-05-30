@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>მორგებული 3D ბეჭდვა | ცაირონი</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyronGreen: '#2e7d32',
+                        cyronOrange: '#ff6d00',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .file-upload {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        .file-upload:hover {
+            border-color: #2e7d32;
+            background-color: #f0fdf4;
+        }
+        .model-viewer-container {
+            height: 400px;
+            background-color: #f3f4f6;
+            border-radius: 0.5rem;
+        }
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff6d00;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        @media (max-width: 768px) {
+            .mobile-menu {
+                display: none;
+            }
+            .mobile-menu.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background-color: white;
+                padding: 1rem;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                z-index: 50;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans" id="custom-main-anim">
+<!-- Header (optional, minimal) -->
+<header 
+    class="shadow-sm sticky top-0 z-40"
+    style="background: url('images/logo/backgrcopy.png') center center/cover no-repeat !important; background-color: #2e7d32 !important;">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center h-16">
+        <div class="flex items-center h-full">
+            <a href="deepsite.html" class="flex items-center h-full">
+                <img src="images/logo/onlytext.png" alt="ცაირონი ლოგო" class="h-24 w-auto max-h-24" />
+            </a>
+        </div>
+        <!-- Center nav links -->
+        <div class="flex-1 flex justify-center">
+            <nav class="hidden md:flex space-x-8">
+                <a href="deepsite.html" class="nav-link text-white font-medium transition-transform duration-200 hover:scale-110">მთავარი</a>
+                <a href="catalog.html" class="nav-link text-white font-medium transition-transform duration-200 hover:scale-110">პროდუქტები</a>
+                <a href="custom-order.html" class="nav-link text-white font-medium transition-transform duration-200 hover:scale-110" id="nav-custom-link">მორგებული შეკვეთა</a>
+            </nav>
+        </div>
+        <!-- Cart button (added for all pages) -->
+        <div class="relative">
+            <button type="button" class="text-white transition-transform duration-200 hover:scale-110" id="cart-link" onclick="toggleCart()">
+                <i class="fas fa-shopping-cart text-xl"></i>
+                <span id="cart-count" class="cart-count">0</span>
+            </button>
+        </div>
+        <button onclick="toggleMobileMenu()" class="md:hidden text-white">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </div>
+    <!-- Cart Sidebar & Overlay (add after header, before main content) -->
+<div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-300">
+    <div class="p-6 h-full flex flex-col">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold">თქვენი კალათა</h3>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="flex-grow overflow-y-auto mb-4">
+            <!-- Cart items will be rendered here -->
+        </div>
+        <div class="border-t border-gray-200 pt-4">
+            <div class="flex justify-between mb-2">
+                <span class="text-gray-600">ჯამი</span>
+                <span id="cart-subtotal" class="font-medium">0 &#8382;</span>
+            </div>
+            <div class="flex justify-between mb-4">
+                <span class="text-gray-600">მიწოდება</span>
+                <span class="font-medium">გამოითვლება გადახდისას</span>
+            </div>
+            <button class="w-full bg-cyronGreen hover:bg-green-800 text-white py-3 rounded-lg font-medium transition duration-300">
+                გადახდა
+            </button>
+            <p class="text-center text-sm text-gray-500 mt-2">ან <a href="deepsite.html" class="text-cyronGreen hover:underline">შოპინგის გაგრძელება</a></p>
+        </div>
+    </div>
+</div>
+<div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="toggleCart()"></div>
+<!-- ...existing code... -->
+</header>
+    <!-- Custom Order Section -->
+    <section id="custom" class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4" id="custom-content-anim">
+            <div class="text-center mb-12" id="custom-header-anim">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">მორგებული 3D ბეჭდვა</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">ატვირთეთ თქვენი 3D მოდელი და ჩვენ დავბეჭდავთ მას თქვენთვის</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto" id="custom-form-anim">
+                <div class="grid grid-cols-1 md:grid-cols-2">
+                    <div class="p-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">შექმენით თქვენი შეკვეთა</h3>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">ატვირთეთ 3D ფაილი</label>
+                            <div class="file-upload rounded-lg p-6 text-center cursor-pointer">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-500 mb-2">ჩააგდეთ ან აირჩიეთ ფაილი</p>
+                                <p class="text-xs text-gray-400">მხარდაჭერილი ფორმატები: .stl, .obj, .glb (მაქს 50MB)</p>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">მასალა</label>
+                            <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyronGreen focus:border-cyronGreen">
+                                <option>PLA (სტანდარტული)</option>
+                                <option>ABS (მტკიცე)</option>
+                                <option>PETG (მოძრავი)</option>
+                                <option>TPU (სისქე-სიმსუბუქე)</option>
+                                <option>Resin (მაღალი დეტალები)</option>
+                            </select>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">ფერი</label>
+                            <div class="flex space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-white border-2 border-gray-300 cursor-pointer"></div>
+                                <div class="w-8 h-8 rounded-full bg-black cursor-pointer"></div>
+                                <div class="w-8 h-8 rounded-full bg-red-500 cursor-pointer"></div>
+                                <div class="w-8 h-8 rounded-full bg-blue-500 cursor-pointer"></div>
+                                <div class="w-8 h-8 rounded-full bg-green-500 cursor-pointer"></div>
+                                <div class="w-8 h-8 rounded-full bg-yellow-400 cursor-pointer"></div>
+                                <div class="w-8 h-8 rounded-full bg-purple-500 cursor-pointer"></div>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">ზომები (სმ)</label>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label class="text-sm text-gray-500">სიგანე</label>
+                                    <input type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="text-sm text-gray-500">სიმაღლე</label>
+                                    <input type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="text-sm text-gray-500">სიღრმე</label>
+                                    <input type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">დამატებითი შენიშვნები</label>
+                            <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="3" placeholder="განსაკუთრებული მოთხოვნები ან ინსტრუქციები..."></textarea>
+                        </div>
+                        <button class="w-full bg-cyronOrange hover:bg-orange-700 text-white py-3 rounded-lg font-medium transition duration-300">
+                            გადახდა
+                        </button>
+                    </div>
+                    <div class="bg-gray-50 p-8 border-t md:border-t-0 md:border-l border-gray-200">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">3D მოდელის ნახვა</h3>
+                        <div class="model-viewer-container flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-cube text-5xl text-gray-300 mb-4"></i>
+                                <p class="text-gray-500">თქვენი 3D მოდელი გამოჩნდება აქ</p>
+                                <p class="text-sm text-gray-400 mt-2">მობრუნება: მარცხენა კლიკი + გადაადგილება | მასშტაბი: სქროლი</p>
+                            </div>
+                        </div>
+                        <div class="mt-8">
+                            <h4 class="font-medium text-gray-700 mb-3">ფასის შეფასება</h4>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-gray-600">მასალის ღირებულება</span>
+                                    <span class="font-medium">$8.50</span>
+                                </div>
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-gray-600">ბეჭდვის დრო</span>
+                                    <span class="font-medium">$4.20</span>
+                                </div>
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-gray-600">დამუშავება</span>
+                                    <span class="font-medium">$2.00</span>
+                                </div>
+                                <div class="border-t border-gray-200 my-2"></div>
+                                <div class="flex justify-between font-bold text-lg">
+                                    <span>სულ</span>
+                                    <span class="text-cyronGreen">$14.70</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">საბოლოო ფასი შეიძლება შეიცვალოს თქვენი მოთხოვნების მიხედვით</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Cart Preview Section -->
+    <section id="cart-preview" class="max-w-2xl mx-auto my-8 bg-white rounded-xl shadow-xl p-6">
+        <h2 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-shopping-cart mr-2"></i> თქვენი კალათა</h2>
+        <div id="cart-preview-items"></div>
+        <div class="border-t border-gray-200 pt-4 mt-4">
+            <div class="flex justify-between mb-2">
+                <span class="text-gray-600">ჯამი</span>
+                <span id="cart-preview-subtotal" class="font-medium">0 &#8382;</span>
+            </div>
+            <a href="#" onclick="toggleCart();return false;" class="block w-full mt-4 bg-cyronGreen hover:bg-green-800 text-white py-3 rounded-lg font-medium text-center transition duration-300">კალათის ნახვა</a>
+        </div>
+    </section>
+    <!-- Optionally add scripts for file upload, etc. -->
+    <script>
+    // Cart count logic
+    let cart = [];
+    function updateCart() {
+        const cartCount = document.getElementById('cart-count');
+        cartCount.textContent = cart.length;
+        cartCount.style.display = cart.length > 0 ? 'flex' : 'none';
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const storedCart = localStorage.getItem('cart');
+        if (storedCart) {
+            cart = JSON.parse(storedCart);
+            updateCart();
+        }
+    });
+    // Mobile menu logic
+    function toggleMobileMenu() {
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenu.classList.toggle('active');
+    }
+
+    // Cart preview logic for custom order page
+    function renderCartPreview() {
+        const cartPreviewItems = document.getElementById('cart-preview-items');
+        const cartPreviewSubtotal = document.getElementById('cart-preview-subtotal');
+        let cart = [];
+        try {
+            cart = JSON.parse(localStorage.getItem('cart')) || [];
+        } catch { cart = []; }
+        if (cartPreviewItems && cartPreviewSubtotal) {
+            if (cart.length > 0) {
+                let itemsHTML = '';
+                let subtotal = 0;
+                cart.forEach(item => {
+                    if (!item.qty) item.qty = 1;
+                    subtotal += Number(item.price) * item.qty;
+                    itemsHTML += `
+                        <div class="flex items-center py-2 border-b border-gray-100">
+                            <div class="w-10 h-10 bg-gray-100 rounded-lg mr-3 flex items-center justify-center overflow-hidden">
+                                ${
+                                    item.image
+                                    ? `<img src="${item.image}" alt="${item.name}" class="object-cover w-full h-full"/>`
+                                    : `<i class="fas fa-cube text-gray-400 text-lg"></i>`
+                                }
+                            </div>
+                            <div class="flex-grow">
+                                <span class="font-medium text-gray-800">${item.name}</span>
+                                <span class="ml-2 text-gray-500 text-sm">x${item.qty || 1}</span>
+                            </div>
+                            <span class="text-gray-700 font-medium">${(Number(item.price) * (item.qty || 1)).toFixed(2)} &#8382;</span>
+                        </div>
+                    `;
+                });
+                cartPreviewItems.innerHTML = itemsHTML;
+                cartPreviewSubtotal.innerHTML = `${subtotal.toFixed(2)} &#8382;`;
+            } else {
+                cartPreviewItems.innerHTML = `<div class="text-center text-gray-400 py-8">კალათა ცარიელია</div>`;
+                cartPreviewSubtotal.innerHTML = '0 &#8382;';
+            }
+        }
+    }
+
+    // Call on load and when cart changes
+    document.addEventListener('DOMContentLoaded', function() {
+        // ...existing code...
+        renderCartPreview();
+    });
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'cart') {
+            renderCartPreview();
+        }
+    });
+
+    // If you have addToCart, removeFromCart, etc. call renderCartPreview after those as well
+
+    // Smooth scroll to top when clicking "მორგებული შეკვეთა" in navbar (if on custom-order.html)
+    document.addEventListener('DOMContentLoaded', function() {
+        var navCustom = document.getElementById('nav-custom-link');
+        if (navCustom) {
+            navCustom.addEventListener('click', function(e) {
+                if (window.location.pathname.endsWith('custom-order.html')) {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+        // ...existing code...
+    });
+
+    // Slide-in animation for custom order page content on load (like catalog.html)
+    document.addEventListener('DOMContentLoaded', function() {
+        const main = document.getElementById('custom-main-anim');
+        const content = document.getElementById('custom-content-anim');
+        const header = document.getElementById('custom-header-anim');
+        const form = document.getElementById('custom-form-anim');
+        if (main && content && header && form) {
+            main.style.opacity = '0';
+            content.style.opacity = '0';
+            content.style.transform = 'translateY(40px)';
+            header.style.opacity = '0';
+            header.style.transform = 'translateX(-40px)';
+            form.style.opacity = '0';
+            form.style.transform = 'translateY(40px)';
+            setTimeout(() => {
+                main.style.transition = 'opacity 0.5s cubic-bezier(.4,0,.2,1)';
+                main.style.opacity = '1';
+                setTimeout(() => {
+                    content.style.transition = 'opacity 0.5s 0.05s, transform 0.5s 0.05s';
+                    content.style.opacity = '1';
+                    content.style.transform = 'translateY(0)';
+                    header.style.transition = 'opacity 0.5s 0.1s, transform 0.5s 0.1s';
+                    header.style.opacity = '1';
+                    header.style.transform = 'translateX(0)';
+                    form.style.transition = 'opacity 0.5s 0.15s, transform 0.5s 0.15s';
+                    form.style.opacity = '1';
+                    form.style.transform = 'translateY(0)';
+                }, 80);
+            }, 10);
+        }
+    });
+
+    // --- Cart logic reusable for all pages ---
+
+function getCart() {
+    const stored = sessionStorage.getItem('cart');
+    return stored ? JSON.parse(stored) : [];
+}
+function setCart(cart) {
+    sessionStorage.setItem('cart', JSON.stringify(cart));
+}
+function updateCartCount() {
+    let cart = getCart();
+    let cartCount = document.getElementById('cart-count');
+    if (cartCount) {
+        cartCount.textContent = cart.length;
+        cartCount.style.display = cart.length > 0 ? 'flex' : 'none';
+    }
+}
+
+// --- Cart sidebar logic (same as catalog.html) ---
+function toggleCart() {
+    const sidebar = document.getElementById('cart-sidebar');
+    const overlay = document.getElementById('cart-overlay');
+    if (sidebar && overlay) {
+        const isOpen = !sidebar.classList.contains('translate-x-full');
+        if (isOpen) {
+            sidebar.classList.add('translate-x-full');
+            overlay.classList.add('hidden');
+        } else {
+            sidebar.classList.remove('translate-x-full');
+            overlay.classList.remove('hidden');
+            renderCartSidebar();
+        }
+    }
+}
+
+function renderCartSidebar() {
+    const cartItems = document.getElementById('cart-items');
+    const cartSubtotal = document.getElementById('cart-subtotal');
+    let cart = getCart();
+    if (cartItems && cartSubtotal) {
+        if (cart.length > 0) {
+            let itemsHTML = '';
+            let subtotal = 0;
+            cart.forEach((item, idx) => {
+                if (!item.qty) item.qty = 1;
+                subtotal += Number(item.price) * item.qty;
+                itemsHTML += `
+                    <div class="flex items-center py-4 border-b border-gray-200">
+                        <div class="w-16 h-16 bg-gray-100 rounded-lg mr-4 flex items-center justify-center overflow-hidden">
+                            ${
+                                item.image
+                                ? `<img src="${item.image}" alt="${item.name}" class="object-cover w-full h-full"/>`
+                                : `<i class="fas fa-cube text-gray-400 text-2xl"></i>`
+                            }
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-medium text-gray-800">${item.name}</h4>
+                            <div class="flex items-center mt-2">
+                                <button class="px-2 py-1 text-lg text-gray-700 border border-gray-300 rounded-l hover:bg-gray-100" onclick="changeCartQty(${idx}, -1)">-</button>
+                                <span class="px-3 py-1 border-t border-b border-gray-300 text-gray-800 bg-white">${item.qty}</span>
+                                <button class="px-2 py-1 text-lg text-gray-700 border border-gray-300 rounded-r hover:bg-gray-100" onclick="changeCartQty(${idx}, 1)">+</button>
+                            </div>
+                            <div class="text-sm text-gray-600 mt-2">ფასი: ${(Number(item.price) * item.qty).toFixed(2)} &#8382;</div>
+                        </div>
+                        <button class="text-gray-500 hover:text-red-500 ml-2" onclick="removeFromCart(${idx}); event.stopPropagation();">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            cartItems.innerHTML = itemsHTML;
+            cartSubtotal.innerHTML = `${subtotal.toFixed(2)} &#8382;`;
+        } else {
+            cartItems.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-shopping-cart text-4xl mb-4"></i>
+                    <p>კალათა ცარიელია</p>
+                </div>
+            `;
+            cartSubtotal.innerHTML = '0 &#8382;';
+        }
+    }
+}
+
+function changeCartQty(idx, delta) {
+    let cart = getCart();
+    if (!cart[idx].qty) cart[idx].qty = 1;
+    cart[idx].qty += delta;
+    if (cart[idx].qty < 1) cart[idx].qty = 1;
+    setCart(cart);
+    updateCartCount();
+    renderCartSidebar();
+}
+
+function removeFromCart(idx) {
+    let cart = getCart();
+    cart.splice(idx, 1);
+    setCart(cart);
+    updateCartCount();
+    renderCartSidebar();
+}
+
+// On all pages: update cart count and sidebar on load
+document.addEventListener('DOMContentLoaded', function() {
+    updateCartCount();
+    renderCartSidebar();
+});
+
+    // ...existing code...
+</script>
+</body>
+</html>

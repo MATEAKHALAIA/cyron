@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>პროდუქტების კატალოგი | ცაირონი</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyronGreen: '#2e7d32',
+                        cyronOrange: '#ff6d00',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff6d00;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        @media (max-width: 768px) {
+            .mobile-menu {
+                display: none;
+            }
+            .mobile-menu.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background-color: white;
+                padding: 1rem;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                z-index: 50;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+<header 
+    class="shadow-sm sticky top-0 z-40"
+    style="background: url('images/logo/backgrcopy.png') center center/cover no-repeat !important; background-color: #2e7d32 !important;">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center h-16">
+        <div class="flex items-center h-full">
+            <a href="deepsite.html" class="flex items-center h-full">
+                <img src="images/logo/onlytext.png" alt="ცაირონი ლოგო" class="h-24 w-auto max-h-24" />
+            </a>
+        </div>
+        <nav class="hidden md:flex space-x-8">
+            <a href="deepsite.html" class="nav-link text-white font-medium transition-transform duration-200 hover:scale-110">მთავარი</a>
+            <a href="catalog.html" class="nav-link text-white font-medium transition-transform duration-200 hover:scale-110" id="nav-products-link">პროდუქტები</a>
+            <a href="custom-order.html" class="nav-link text-white font-medium transition-transform duration-200 hover:scale-110">მორგებული შეკვეთა</a>
+        </nav>
+        <div class="relative">
+            <!-- Cart button opens sidebar instead of redirect -->
+            <button type="button" class="text-white transition-transform duration-200 hover:scale-110" id="cart-link" onclick="toggleCart()">
+                <i class="fas fa-shopping-cart text-xl"></i>
+                <span id="cart-count" class="cart-count">0</span>
+            </button>
+        </div>
+        <button onclick="toggleMobileMenu()" class="md:hidden text-white">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </div>
+    <!-- Mobile menu -->
+    <!--
+    <div id="mobile-menu" class="mobile-menu absolute left-0 right-0 bg-white shadow-lg z-50">
+        <nav class="flex flex-col space-y-4">
+            <a href="deepsite.html" class="nav-link text-gray-800 font-medium">მთავარი</a>
+            <a href="catalog.html" class="nav-link text-gray-800 font-medium">პროდუქტები</a>
+            <a href="custom-order.html" class="nav-link text-gray-800 font-medium">მორგებული შეკვეთა</a>
+            <a href="#about" class="nav-link text-gray-800 font-medium">ჩვენს შესახებ</a>
+            <a href="#contact" class="nav-link text-gray-800 font-medium">კონტაქტი</a>
+        </nav>
+    </div>
+    -->
+</header>
+<main class="py-12" id="catalog-main-anim">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl mx-auto overflow-hidden flex flex-col md:flex-row">
+        <!-- Filters Sidebar -->
+        <aside class="w-full md:w-64 border-r border-gray-200 p-6 bg-gray-50" id="filters-anim">
+            <!-- Search field above categories -->
+            <div class="mb-8">
+                <label for="search-input" class="block text-gray-700 mb-2">ძიება</label>
+                <input id="search-input" type="text" placeholder="პროდუქტის ძიება..." class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <div class="mb-8">
+                <label class="block text-gray-700 mb-2">კატეგორია</label>
+                <select id="category-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    <option value="all">ყველა</option>
+                    <option value="საყოფაცხოვრებო">საყოფაცხოვრებო</option>
+                    <option value="განათება">განათება</option>
+                    <option value="თარო">თარო</option>
+                </select>
+            </div>
+            <div class="mb-8">
+                <label class="block text-gray-700 mb-2">ფასის დიაპაზონი</label>
+                <select id="price-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-2">
+                    <option value="all">ყველა ფასი</option>
+                    <option value="under10">10₾-მდე</option>
+                    <option value="10-25">10₾ - 25₾</option>
+                    <option value="25-50">25₾ - 50₾</option>
+                    <option value="over50">50₾-ზე მეტი</option>
+                </select>
+                <div id="custom-price-fields" class="flex space-x-2 mt-2">
+                    <input id="min-price" type="number" min="0" placeholder="მინ ₾" class="w-1/2 px-2 py-1 border border-gray-300 rounded-lg text-sm" />
+                    <input id="max-price" type="number" min="0" placeholder="მაქს ₾" class="w-1/2 px-2 py-1 border border-gray-300 rounded-lg text-sm" />
+                </div>
+            </div>
+        </aside>
+        <!-- Products Grid -->
+        <div class="flex-1 p-6" id="products-anim">
+            <div 
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-500 ease-in-out"
+                id="products-grid"
+                style="opacity:1;transform:scale(1);"
+            >
+                <!-- ...existing product cards... -->
+            </div>
+        </div>
+    </div>
+</main>
+<!-- Product Details Modal -->
+<div id="product-modal-overlay" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden"></div>
+<div id="product-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="relative bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6 flex flex-col opacity-0 scale-95 transition-all duration-300"
+         id="product-modal-inner">
+        <button id="close-product-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl focus:outline-none">
+            <i class="fas fa-times"></i>
+        </button>
+        <div id="product-modal-content">
+            <!-- JS will fill this -->
+        </div>
+    </div>
+</div>
+<!-- Cart Sidebar & Overlay -->
+<div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-300">
+    <div class="p-6 h-full flex flex-col">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold">თქვენი კალათა</h3>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="flex-grow overflow-y-auto mb-4">
+            <!-- Cart items will be rendered here -->
+        </div>
+        <div class="border-t border-gray-200 pt-4">
+            <div class="flex justify-between mb-2">
+                <span class="text-gray-600">ჯამი</span>
+                <span id="cart-subtotal" class="font-medium">0 &#8382;</span>
+            </div>
+            <div class="flex justify-between mb-4">
+                <span class="text-gray-600">მიწოდება</span>
+                <span class="font-medium">გამოითვლება გადახდისას</span>
+            </div>
+            <button class="w-full bg-cyronGreen hover:bg-green-800 text-white py-3 rounded-lg font-medium transition duration-300">
+                გადახდა
+            </button>
+            <p class="text-center text-sm text-gray-500 mt-2">ან <a href="deepsite.html" class="text-cyronGreen hover:underline">შოპინგის გაგრძელება</a></p>
+        </div>
+    </div>
+</div>
+<div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="toggleCart()"></div>
+<script>
+    // --- Cart logic reusable for all pages ---
+
+    // Utility to get cart from sessionStorage
+    function getCart() {
+        const stored = sessionStorage.getItem('cart');
+        return stored ? JSON.parse(stored) : [];
+    }
+    // Utility to set cart to sessionStorage
+    function setCart(cart) {
+        sessionStorage.setItem('cart', JSON.stringify(cart));
+    }
+    // Update cart count badge
+    function updateCartCount() {
+        let cart = getCart();
+        let cartCount = document.getElementById('cart-count');
+        if (!cartCount) {
+            // Try to create cart button if not present
+            insertCartButton();
+            cartCount = document.getElementById('cart-count');
+        }
+        if (cartCount) {
+            cartCount.textContent = cart.length;
+            cartCount.style.display = cart.length > 0 ? 'flex' : 'none';
+        }
+    }
+    // Insert cart button in header if missing (for main/custom-order pages)
+    function insertCartButton() {
+        // Find header container
+        const header = document.querySelector('header .container');
+        if (!header) return;
+        // Avoid duplicate
+        if (document.getElementById('cart-link')) return;
+        // Create wrapper
+        const div = document.createElement('div');
+        div.className = 'relative';
+        div.innerHTML = `
+            <button type="button" class="text-white transition-transform duration-200 hover:scale-110" id="cart-link" onclick="toggleCart()">
+                <i class="fas fa-shopping-cart text-xl"></i>
+                <span id="cart-count" class="cart-count">0</span>
+            </button>
+        `;
+        // Insert before mobile menu button
+        const mobileBtn = header.querySelector('button[onclick*="toggleMobileMenu"]');
+        header.insertBefore(div, mobileBtn);
+    }
+    // Show cart sidebar (if present)
+    function toggleCart() {
+        const sidebar = document.getElementById('cart-sidebar');
+        const overlay = document.getElementById('cart-overlay');
+        if (sidebar && overlay) {
+            const isOpen = !sidebar.classList.contains('translate-x-full');
+            if (isOpen) {
+                sidebar.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                if (typeof renderCartSidebar === 'function') renderCartSidebar();
+            }
+        }
+    }
+    // On all pages: update cart count and insert button if needed
+    document.addEventListener('DOMContentLoaded', function() {
+        insertCartButton();
+        updateCartCount();
+    });
+
+    // --- Catalog page specific code below ---
+    // Cart count logic
+    let cart = getCart();
+    function updateCart() {
+        updateCartCount();
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        cart = getCart();
+        updateCart();
+    });
+    // Mobile menu logic
+    function toggleMobileMenu() {
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenu.classList.toggle('active');
+    }
+
+    // Product data (should match product.json)
+    const products = [
+        { name: "გრავიტაციული საკიდი", description: "ლამაზი პროდუქტი", price: 25, image: "images/გრავიტაციული საკიდი.jpg", category: "საყოფაცხოვრებო", specs: "მასალა: პლასტმასი, ზომა: 20x10სმ" },
+        { name: "ოვალური ლამფა", description: "ლამაზი პროდუქტი", price: 80, image: "images/garunulilampa.jpg", category: "განათება", specs: "სიმძლავრე: 5W" },
+        { name: "თაროს სამაგრი", description: "ლამაზი პროდუქტი", price: 25, image: "images/თარო1.jpg", category: "თარო" },
+        { name: "უჯრის ორგანიზატორი", description: "ლამაზი პროდუქტი", price: 25, image: "images/უჯრის ორგანიზატორი.jpg", category: "საყოფაცხოვრებო" },
+        { name: "პირსახოცის საკიდი", description: "კარგი ხარისხი", price: 35, image: "images/პირსახოცის საკიდი.png", category: "საყოფაცხოვრებო" },
+        { name: "ლამფა", description: "კარგი ხარისხი", price: 35, image: "images/ლამფა2.jpg", category: "განათება" },
+        { name: "სათვალის ჩარჩო", description: "კარგი ხარისხი", price: 35, image: "images/სათვალის ჩარჩო.jpg", category: "სხვადასხვა" },
+        { name: "საკანცელარიო დანა", description: "კარგი ხარისხი", price: 35, image: "images/საკანცელარიო დანა.jpg", category: "სხვადასხვა" },
+        { name: "საფულე", description: "კარგი ხარისხი", price: 35, image: "images/საფულე.jpg", category: "სხვადასხვა" },
+        { name: "ტელეფონის  დენცქვიტაზე საკიდი", description: "კარგი ხარისხი", price: 35, image: "images/ტელეფონის  დენცქვიტაზე საკიდი.jpg", category: "საყოფაცხოვრებო" },
+        { name: "ტელეფონის  დენცქვიტაზე საკიდი2", description: "კარგი ხარისხი", price: 35, image: "images/ტელეფონის  დენცქვიტაზე საკიდი2.jpg", category: "საყოფაცხოვრებო" },
+        // ფანერის კონექტორი თაროს კატეგორიაში
+        { name: "ფანერის კონექტორი", description: "კარგი ხარისხი", price: 35, image: "images/ფანერის კონექტორი.jpg", category: "თარო" },
+        { name: "ფუტკრის ტექსტურის თარო", description: "კარგი ხარისხი", price: 35, image: "images/ფუტკრის ტექსტურის თარო.jpg", category: "თარო" },
+        { name: "ცელოფნის სახვევი", description: "კარგი ხარისხი", price: 35, image: "images/ცელოფნის სახვევი.jpg", category: "საყოფაცხოვრებო" },
+        { name: "წიგნების საკიდითარო", description: "კარგი ხარისხი", price: 35, image: "images/წიგნების საკიდითარო.jpg", category: "თარო" },
+        { name: "ჭიქის დასადები მაგიდაზე მისამაგრებელი", description: "კარგი ხარისხი", price: 35, image: "images/ჭიქის დასადები მაგიდაზე მისამაგრებელი.jpg", category: "საყოფაცხოვრებო" }
+    ];
+
+    function renderProducts(filtered) {
+        const grid = document.getElementById('products-grid');
+        grid.innerHTML = '';
+        if (filtered.length === 0) {
+            grid.innerHTML = '<div class="col-span-3 text-center text-gray-400 py-12">პროდუქტი ვერ მოიძებნა</div>';
+            return;
+        }
+        filtered.forEach(product => {
+            grid.innerHTML += `
+                <div class="product-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300 flex flex-col cursor-pointer group" 
+                    onclick="if(event.target.closest('button'))return;openProductModal('${product.name.replace(/'/g,"\\'")}')">
+                    <div class="h-48 bg-gray-100 flex items-center justify-center">
+                        <img src="${product.image}" alt="${product.name}" class="h-full w-full object-cover">
+                    </div>
+                    <div class="p-4 flex flex-col flex-1">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">${product.name}</h3>
+                        <p class="text-gray-600 text-sm mb-3">${product.description}</p>
+                        <div class="flex flex-col items-stretch mt-auto">
+                            <span class="text-lg font-bold text-black mb-2">${Number(product.price).toFixed(2)} &#8382;</span>
+                            <button 
+                                class="px-5 py-2 rounded-lg text-base transition duration-300 text-white font-semibold"
+                                style="background-image: url('images/logo/backgrcopy.png'); background-size: cover; background-position: center; background-repeat: no-repeat; border: none;"
+                                onclick="addToCartAndGo('${product.name.replace(/'/g,"\\'")}', ${product.price});event.stopPropagation();"
+                            >
+                                კალათაში დამატე
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // Product modal logic: place image above title, animate in with 0.1s delay
+    function openProductModal(productName) {
+        const product = products.find(p => p.name === productName);
+        if (!product) return;
+        const modal = document.getElementById('product-modal');
+        const overlay = document.getElementById('product-modal-overlay');
+        const inner = document.getElementById('product-modal-inner');
+        const content = document.getElementById('product-modal-content');
+
+        // Fill modal content: image above title
+        content.innerHTML = `
+            <div class="flex flex-col items-center">
+                <img id="modal-fly-image" src="${product.image}" alt="${product.name}" class="w-64 h-64 object-cover rounded-lg mb-4 border border-gray-200 opacity-0 transition-all duration-500" style="margin-top:0;">
+                <h2 class="text-2xl font-bold mb-2 text-center">${product.name}</h2>
+                <p class="text-gray-700 mb-2 text-center">${product.description}</p>
+                <div class="text-lg font-semibold text-cyronGreen mb-2">${Number(product.price).toFixed(2)} &#8382;</div>
+                <div class="mb-4 text-gray-600 text-sm text-center">სპეციფიკაციები: ${product.specs ? product.specs : "---"}</div>
+                <button 
+                    class="px-6 py-2 rounded-lg text-base transition duration-300 text-white font-semibold mb-2"
+                    style="background-image: url('images/logo/backgrcopy.png'); background-size: cover; background-position: center; background-repeat: no-repeat; border: none;"
+                    onclick="addToCartAndGo('${product.name.replace(/'/g,"\\'")}', ${product.price})"
+                >
+                    კალათაში დამატე
+                </button>
+            </div>
+        `;
+
+        overlay.classList.remove('hidden');
+        modal.classList.remove('hidden');
+
+        // Animate modal in
+        inner.style.opacity = '0';
+        inner.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            inner.style.transition = 'opacity 0.3s, transform 0.3s';
+            inner.style.opacity = '1';
+            inner.style.transform = 'scale(1)';
+        }, 10);
+
+        // Animate image in with 0.1s delay
+        setTimeout(() => {
+            const flyImg = document.getElementById('modal-fly-image');
+            if (flyImg) {
+                flyImg.style.opacity = '1';
+            }
+        }, 110);
+
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeProductModal() {
+        const modal = document.getElementById('product-modal');
+        const overlay = document.getElementById('product-modal-overlay');
+        const inner = document.getElementById('product-modal-inner');
+        // Animate out
+        overlay.style.opacity = '0';
+        inner.style.opacity = '0';
+        inner.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            overlay.classList.add('hidden');
+            document.body.style.overflow = '';
+        }, 300);
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('close-product-modal').onclick = closeProductModal;
+        document.getElementById('product-modal-overlay').onclick = closeProductModal;
+    });
+
+    // Cart sidebar logic
+    function toggleCart() {
+        const sidebar = document.getElementById('cart-sidebar');
+        const overlay = document.getElementById('cart-overlay');
+        const isOpen = !sidebar.classList.contains('translate-x-full');
+        if (isOpen) {
+            sidebar.classList.add('translate-x-full');
+            overlay.classList.add('hidden');
+        } else {
+            sidebar.classList.remove('translate-x-full');
+            overlay.classList.remove('hidden');
+            renderCartSidebar();
+        }
+    }
+
+    function renderCartSidebar() {
+        const cartItems = document.getElementById('cart-items');
+        const cartSubtotal = document.getElementById('cart-subtotal');
+        if (cartItems && cartSubtotal) {
+            let cart = getCart();
+            if (cart.length > 0) {
+                let itemsHTML = '';
+                let subtotal = 0;
+                cart.forEach((item, idx) => {
+                    // Default quantity if not set
+                    if (!item.qty) item.qty = 1;
+                    subtotal += Number(item.price) * item.qty;
+                    // Find product image by name
+                    const product = products.find(p => p.name === item.name);
+                    const imgSrc = product && product.image ? product.image : '';
+                    itemsHTML += `
+                        <div class="flex items-center py-4 border-b border-gray-200">
+                            <div class="w-16 h-16 bg-gray-100 rounded-lg mr-4 flex items-center justify-center overflow-hidden">
+                                ${imgSrc ? `<img src="${imgSrc}" alt="${item.name}" class="w-full h-full object-cover rounded-lg">` : `<i class="fas fa-cube text-gray-400 text-2xl"></i>`}
+                            </div>
+                            <div class="flex-grow">
+                                <h4 class="font-medium text-gray-800">${item.name}</h4>
+                                <div class="flex items-center mt-2">
+                                    <button class="px-2 py-1 text-lg text-gray-700 border border-gray-300 rounded-l hover:bg-gray-100" onclick="changeCartQty(${idx}, -1)">-</button>
+                                    <span class="px-3 py-1 border-t border-b border-gray-300 text-gray-800 bg-white">${item.qty}</span>
+                                    <button class="px-2 py-1 text-lg text-gray-700 border border-gray-300 rounded-r hover:bg-gray-100" onclick="changeCartQty(${idx}, 1)">+</button>
+                                </div>
+                                <div class="text-sm text-gray-600 mt-2">ფასი: ${(Number(item.price) * item.qty).toFixed(2)} &#8382;</div>
+                            </div>
+                            <button class="text-gray-500 hover:text-red-500 ml-2" onclick="removeFromCart(${idx}); event.stopPropagation();">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                cartItems.innerHTML = itemsHTML;
+                cartSubtotal.innerHTML = `${subtotal.toFixed(2)} &#8382;`;
+            } else {
+                cartItems.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-shopping-cart text-4xl mb-4"></i>
+                        <p>კალათა ცარიელია</p>
+                    </div>
+                `;
+                cartSubtotal.innerHTML = '0 &#8382;';
+            }
+        }
+    }
+
+    function changeCartQty(idx, delta) {
+        cart = getCart();
+        if (!cart[idx].qty) cart[idx].qty = 1;
+        cart[idx].qty += delta;
+        if (cart[idx].qty < 1) cart[idx].qty = 1;
+        setCart(cart);
+        updateCart();
+        renderCartSidebar();
+    }
+
+    function removeFromCart(idx) {
+        cart = getCart();
+        cart.splice(idx, 1);
+        setCart(cart);
+        updateCart();
+        renderCartSidebar();
+    }
+
+    // Update cart count and sidebar on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const storedCart = sessionStorage.getItem('cart');
+        if (storedCart) {
+            cart = JSON.parse(storedCart);
+            updateCart();
+        }
+        renderCartSidebar();
+    });
+
+    // Update addToCartAndGo to just add to cart and open sidebar
+    function addToCartAndGo(name, price) {
+        cart = getCart();
+        const idx = cart.findIndex(item => item.name === name);
+        if (idx !== -1) {
+            cart[idx].qty = (cart[idx].qty || 1) + 1;
+        } else {
+            cart.push({ name, price, qty: 1 });
+        }
+        setCart(cart);
+        updateCart();
+        if (typeof renderCartSidebar === 'function') renderCartSidebar();
+        // Open sidebar if present
+        const sidebar = document.getElementById('cart-sidebar');
+        const overlay = document.getElementById('cart-overlay');
+        if (sidebar && overlay) {
+            sidebar.classList.remove('translate-x-full');
+            overlay.classList.remove('hidden');
+        }
+    }
+
+    function filterProducts(animated = false) {
+        const cat = document.getElementById('category-filter').value;
+        const price = document.getElementById('price-filter').value;
+        const minInput = document.getElementById('min-price');
+        const maxInput = document.getElementById('max-price');
+        const search = document.getElementById('search-input').value.trim().toLowerCase();
+        let filtered = products;
+
+        if (cat !== 'all') {
+            filtered = filtered.filter(p => p.category === cat);
+        }
+        if (price !== 'all') {
+            filtered = filtered.filter(p => {
+                if (price === 'under10') return p.price < 10;
+                if (price === '10-25') return p.price >= 10 && p.price <= 25;
+                if (price === '25-50') return p.price > 25 && p.price <= 50;
+                if (price === 'over50') return p.price > 50;
+                return true;
+            });
+        }
+        const min = parseFloat(minInput.value);
+        const max = parseFloat(maxInput.value);
+        if (!isNaN(min) || !isNaN(max)) {
+            filtered = filtered.filter(p => {
+                const price = Number(p.price);
+                if (!isNaN(min) && !isNaN(max)) return price >= min && price <= max;
+                if (!isNaN(min)) return price >= min;
+                if (!isNaN(max)) return price <= max;
+                return true;
+            });
+        }
+        if (search) {
+            filtered = filtered.filter(p =>
+                p.name.toLowerCase().includes(search) ||
+                (p.description && p.description.toLowerCase().includes(search))
+            );
+        }
+        if (animated) {
+            animateProductsGridOut(() => renderProducts(filtered));
+        } else {
+            renderProducts(filtered);
+        }
+    }
+
+    function animateProductsGridOut(callback) {
+        const grid = document.getElementById('products-grid');
+        grid.style.opacity = '0';
+        grid.style.transform = 'scale(0.96)';
+        setTimeout(() => {
+            callback();
+            grid.style.opacity = '1';
+            grid.style.transform = 'scale(1)';
+        }, 250);
+    }
+
+    function filterProducts(animated = false) {
+        const cat = document.getElementById('category-filter').value;
+        const price = document.getElementById('price-filter').value;
+        const minInput = document.getElementById('min-price');
+        const maxInput = document.getElementById('max-price');
+        const search = document.getElementById('search-input').value.trim().toLowerCase();
+        let filtered = products;
+
+        if (cat !== 'all') {
+            filtered = filtered.filter(p => p.category === cat);
+        }
+        if (price !== 'all') {
+            filtered = filtered.filter(p => {
+                if (price === 'under10') return p.price < 10;
+                if (price === '10-25') return p.price >= 10 && p.price <= 25;
+                if (price === '25-50') return p.price > 25 && p.price <= 50;
+                if (price === 'over50') return p.price > 50;
+                return true;
+            });
+        }
+        const min = parseFloat(minInput.value);
+        const max = parseFloat(maxInput.value);
+        if (!isNaN(min) || !isNaN(max)) {
+            filtered = filtered.filter(p => {
+                const price = Number(p.price);
+                if (!isNaN(min) && !isNaN(max)) return price >= min && price <= max;
+                if (!isNaN(min)) return price >= min;
+                if (!isNaN(max)) return price <= max;
+                return true;
+            });
+        }
+        if (search) {
+            filtered = filtered.filter(p =>
+                p.name.toLowerCase().includes(search) ||
+                (p.description && p.description.toLowerCase().includes(search))
+            );
+        }
+        if (animated) {
+            animateProductsGridOut(() => renderProducts(filtered));
+        } else {
+            renderProducts(filtered);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // ...existing cart count logic...
+        renderProducts(products);
+        document.getElementById('category-filter').addEventListener('change', () => filterProducts(true));
+        document.getElementById('price-filter').addEventListener('change', () => filterProducts(true));
+        document.getElementById('min-price').addEventListener('input', () => filterProducts());
+        document.getElementById('max-price').addEventListener('input', () => filterProducts());
+        document.getElementById('search-input').addEventListener('input', () => filterProducts(true));
+
+        // Auto-select category from URL param
+        const urlParams = new URLSearchParams(window.location.search);
+        const catParam = urlParams.get('category');
+        if (catParam) {
+            document.getElementById('category-filter').value = catParam;
+            filterProducts();
+        }
+    });
+
+    // Smooth scroll to top when clicking "პროდუქტები" in navbar (if on catalog.html)
+    document.addEventListener('DOMContentLoaded', function() {
+        // ...existing code...
+        var navProducts = document.getElementById('nav-products-link');
+        if (navProducts) {
+            navProducts.addEventListener('click', function(e) {
+                // Only prevent default if already on catalog.html
+                if (window.location.pathname.endsWith('catalog.html')) {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+        // ...existing code...
+    });
+
+    // Slide-in animation for filters and products on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only animate if not coming from a filter/search (i.e. only on first load or from main page)
+        const main = document.getElementById('catalog-main-anim');
+        const filters = document.getElementById('filters-anim');
+        const products = document.getElementById('products-anim');
+        if (main && filters && products) {
+            main.style.opacity = '0';
+            filters.style.opacity = '0';
+            filters.style.transform = 'translateX(-40px)';
+            products.style.opacity = '0';
+            products.style.transform = 'translateY(40px)';
+            setTimeout(() => {
+                main.style.transition = 'opacity 0.5s cubic-bezier(.4,0,.2,1)';
+                main.style.opacity = '1';
+                setTimeout(() => {
+                    filters.style.transition = 'opacity 0.5s 0.1s, transform 0.5s 0.1s';
+                    filters.style.opacity = '1';
+                    filters.style.transform = 'translateX(0)';
+                    products.style.transition = 'opacity 0.5s 0.2s, transform 0.5s 0.2s';
+                    products.style.opacity = '1';
+                    products.style.transform = 'translateY(0)';
+                }, 80);
+            }, 10);
+        }
+    });
+
+    // ...existing code...
+</script>
+</body>
+</html>

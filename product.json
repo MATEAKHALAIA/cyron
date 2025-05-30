@@ -1,0 +1,114 @@
+[
+  {
+    "name": "გრავიტაციული საკიდი",
+    "description": "ლამაზი პროდუქტი",
+    "price": "25.00",
+    "image": "images/გრავიტაციული საკიდი.jpg",
+    "category": "საყოფაცხოვრებო"
+  },
+  {
+    "name": "garunulilampa",
+    "description": "ლამაზი პროდუქტი",
+    "price": "25.00",
+    "image": "images/garunulilampa.jpg",
+    "category": "განათება"
+  },
+  {
+    "name": "თარო1",
+    "description": "ლამაზი პროდუქტი",
+    "price": "25.00",
+    "image": "images/თარო1.jpg",
+    "category": "თარო"
+  },
+  {
+    "name": "უჯრის ორგანიზატორი",
+    "description": "ლამაზი პროდუქტი",
+    "price": "25.00",
+    "image": "images/უჯრის ორგანიზატორი.jpg",
+    "category": "საყოფაცხოვრებო"
+  },
+  {
+    "name": "პირსახოცის საკიდი",
+    "description": "კარგი ხარისხი",
+    "price": "35.00",
+    "image": "images/პირსახოცის საკიდი.png",
+    "category": "საყოფაცხოვრებო"
+  },
+  {
+    "name": "ლამფა2",
+    "description": "კარგი ხარისხი",
+    "price": "35.00",
+    "image": "images/ლამფა2.jpg",
+    "category": "განათება"
+  },
+  {
+    "name": "სათვალის ჩარჩო",
+    "description": "კარგი ხარისხი",
+    "price": "35.00",
+    "image": "images/სათვალის ჩარჩო.jpg",
+    "category": "სხვადასხვა"
+  },
+  {
+    "name": "საკანცელარიო დანა",
+    "description": "კარგი ხარისხი",
+    "price": "35.00",
+    "image": "images/საკანცელარიო დანა.jpg",
+    "category": "სხვადასხვა"
+  },
+  {
+    "name": "საფულე",
+    "description": "კარგი ხარისხი",
+    "price": "35.00",
+    "image": "images/საფულე.jpg",
+    "category": "სხვადასხვა"
+  },
+  {
+    "name": "ტელეფონის  დენცქვიტაზე საკიდი",
+    "description": "კარგი ხარისხი",
+    "price": "35.00",
+    "image": "images/ტელეფონის  დენცქვიტაზე საკიდი.jpg",
+    "category": "საყოფაცხოვრებო"
+  },
+  {
+    "name": "ტელეფონის  დენცქვიტაზე საკიდი2",
+    "description": "კარგი ხარისხი",
+    "price": "35.00",
+    "image": "images/ტელეფონის  დენცქვიტაზე საკიდი2.jpg",
+    "category": "საყოფაცხოვრებო"
+  },
+  {
+    "name": "ფანერის კონექტორი",
+    "description": "კარგი ხარისხი",
+    "price": "35.00",
+    "image": "images/ფანერის კონექტორი.jpg",
+    "category": "თარო"
+  },
+  {
+    "name": "ფუტკრის ტექსტურის თარო",
+    "description": "კარგი ხარისხი",
+    "price": "35.00",
+    "image": "images/ფუტკრის ტექსტურის თარო.jpg",
+    "category": "თარო"
+  },
+  {
+    "name": "ცელოფნის სახვევი",
+    "description": "კარგი ხარისხი",
+    "price": "35.00",
+    "image": "images/ცელოფნის სახვევი.jpg",
+    "category": "საყოფაცხოვრებო"
+  },
+  {
+    "name": "წიგნების საკიდითარო",
+    "description": "კარგი ხარისხი",
+    "price": "35.00",
+    "image": "images/წიგნების საკიდითარო.jpg",
+    "category": "თარო"
+  },
+  {
+    "name": "ჭიქის დასადები მაგიდაზე მისამაგრებელი",
+    "description": "კარგი ხარისხი",
+    "price": "35.00",
+    "image": "images/ჭიქის დასადები მაგიდაზე მისამაგრებელი.jpg",
+    "category": "საყოფაცხოვრებო"
+  }
+]

@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ცაირონი - პრემიუმ 3D ბეჭდვის გადაწყვეტილებები</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyronGreen: '#2e7d32',
+                        cyronOrange: '#ff6d00',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .file-upload {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        .file-upload:hover {
+            border-color: #2e7d32;
+            background-color: #f0fdf4;
+        }
+        .model-viewer-container {
+            height: 400px;
+            background-color: #f3f4f6;
+            border-radius: 0.5rem;
+        }
+
+        .language-switcher:hover {
+            color: #2e7d32;
+        }
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff6d00;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        @media (max-width: 768px) {
+            .mobile-menu {
+                display: none;
+            }
+            .mobile-menu.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background-color: white;
+                padding: 1rem;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                z-index: 50;
+            }
+        }
+        .category-card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.category-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 12px 24px rgba(46, 125, 50, 0.10), 0 1.5px 4px rgba(0,0,0,0.04);
+}
+    /* Add background image to all green buttons */
+    .bg-cyronGreen,
+    .bg-cyronGreen:hover {
+        background-image: url('images/logo/backgrcopy.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        /* fallback color if image fails */
+        background-color: #2e7d32;
+    }
+    /* For About section icons */
+    .about-icon-bg {
+        background-image: url('images/logo/backgrcopy.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: transparent !important;
+    }
+    /* Make icons white in About section */
+    .about-icon-bg i {
+        color: #fff !important;
+    }
+       .cyron-logo-glow-parent {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+}
+.cyron-logo-glow {
+  position: relative;
+  z-index: 1;
+  display: block;
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+}
+.cyron-logo-glow-parent:hover .cyron-logo-glow {
+  transform: scale(1.07);
+}
+.cyron-logo-glow-effect {
+  pointer-events: none;
+  position: absolute;
+  top: 0; left: -70%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(110deg, rgba(255,255,255,0) 60%, rgba(255,255,255,0.85) 85%, rgba(255,255,255,0) 100%);
+  transform: skewX(-18deg);
+  opacity: 0.85;
+  z-index: 2;
+  transition: left 0.7s cubic-bezier(.4,0,.2,1), opacity 0.3s;
+  filter: blur(1px);
+  mix-blend-mode: lighten;
+}
+.cyron-logo-glow-parent:hover .cyron-logo-glow-effect {
+  left: 110%;
+  opacity: 1;
+  transition: left 0.7s cubic-bezier(.4,0,.2,1), opacity 0.3s;
+}
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+   <!-- ...existing code... -->
+<!-- Replace header class and add style for background image -->
+<header 
+    class="shadow-sm sticky top-0 z-40"
+    style="background: url('images/logo/backgrcopy.png') center center/cover no-repeat !important; background-color: #2e7d32 !important;">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center h-16">
+        <div class="flex items-center h-full">
+            <a href="#" class="flex items-center h-full">
+                <img src="images/logo/onlytext.png" alt="ცაირონი ლოგო" class="h-24 w-auto max-h-24" />
+            </a>
+        </div>
+        <!-- Center nav links -->
+        <div class="flex-1 flex justify-center">
+            <nav class="hidden md:flex space-x-8">
+                <a href="#" class="nav-link text-white font-medium transition-transform duration-200 hover:scale-110" id="nav-home-link">მთავარი</a>
+                <a href="catalog.html" class="nav-link text-white font-medium transition-transform duration-200 hover:scale-110" id="nav-products-link">პროდუქტები</a>
+                <a href="custom-order.html" class="nav-link text-white font-medium transition-transform duration-200 hover:scale-110" id="nav-custom-link">მორგებული შეკვეთა</a>
+            </nav>
+        </div>
+        <!-- Cart button (added for all pages) -->
+        <div class="relative">
+            <button type="button" class="text-white transition-transform duration-200 hover:scale-110" id="cart-link" onclick="toggleCart()">
+                <i class="fas fa-shopping-cart text-xl"></i>
+                <span id="cart-count" class="cart-count">0</span>
+            </button>
+        </div>
+        <button onclick="toggleMobileMenu()" class="md:hidden text-white">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </div>
+    <!-- ...existing code... -->
+</header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-r from-gray-100 to-gray-100 py-16 md:py-24 relative" style="min-height: 520px;">
+    <!-- Fullscreen background image, higher height for better visibility -->
+    <img src="images/logo/cyron.png" alt="Cyron Background" class="absolute inset-0 w-full h-full object-cover z-0" style="opacity:0.28; pointer-events:none; min-height:520px; max-height:none;">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row items-center relative z-10" style="min-height:520px;">
+        <div class="md:w-1/2 mb-10 md:mb-0 mx-auto text-center md:text-left">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+                <span 
+                  class="bg-clip-text text-transparent font-bold"
+                  style="background-image: radial-gradient(circle at 60% 40%,  #ff7d2e 30%,  #ff6d00 100%);"
+                >
+                  მაღალი ხარისხის
+                </span> 3D-დაბეჭდილი პროდუქტები და პერსონალური ბეჭდვა თქვენთვის!
+            </h1>
+            <p class="text-gray-600 text-lg mb-8">
+                აღმოაჩინეთ ჩვენი პრემიუმ 3D პროდუქტები ან ატვირთეთ თქვენი დიზაინი პერსონალიზაციისთვის.
+            </p>
+        </div>
+        <!-- ფოტო წაშლილია, მხოლოდ ტექსტი ჩანს ბექგრაუნდზე -->
+    </div>
+</section>
+
+    <!-- Featured Products -->
+    <section id="products" class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">რჩეული პროდუქტები</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">დაათვალიერეთ ჩვენი პრემიუმ 3D პროდუქტები</p>
+            <!-- Category Layout: Big left image, 3 right cards -->
+         <!-- ...existing code... -->
+<div class="mt-8 flex flex-col lg:flex-row items-center justify-center gap-2 mx-auto">
+    <!-- Left: Big Card (center) -->
+    <div class="w-full lg:w-1/2 flex justify-center">
+        <button
+            class="group relative w-full max-w-xl h-[32rem] lg:h-[40rem] rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-green-100 to-green-50 transition-transform duration-200 flex items-end justify-start"
+            onclick="window.location.href='custom-order.html';"
+        >
+            <img src="images/costum.png" alt="Custom Order"
+                 class="absolute inset-0 w-full h-full object-cover pointer-events-none transition-all duration-300 blur-sm group-hover:blur-0" />
+            <div class="absolute bottom-0 left-0 w-full z-20 p-8 flex items-center bg-gradient-to-t from-black/40 via-black/10 to-transparent">
+                <span class="text-cyronGreen text-4xl mb-2 block mr-4">
+                    <i class="fas fa-puzzle-piece"></i>
+                </span>
+                <span class="text-white font-bold text-2xl block">
+                    ინდივიდუალური შეკვეთა
+                </span>
+            </div>
+        </button>
+    </div>
+    <!-- Right: 3 stacked cards (narrower) -->
+    <div class="hidden lg:flex flex-col gap-6 w-1/4 h-[40rem]">
+        <!-- Top: Shelf (half height) -->
+        <button
+            class="group relative w-full flex-1 basis-1/2 min-h-0 h-1/2 rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-orange-100 to-orange-50 transition-transform duration-200 flex items-end"
+            onclick="window.location.href='catalog.html?category=თარო';"
+        >
+            <img src="images/თარო1.jpg" alt="თარო"
+                 class="absolute inset-0 w-full h-full object-cover pointer-events-none transition-all duration-300 blur-sm group-hover:blur-0">
+            <div class="absolute bottom-0 left-0 w-full z-20 p-6 flex items-center bg-gradient-to-t from-black/40 via-black/10 to-transparent">
+                <span class="text-cyronOrange text-3xl mr-4"><i class="fas fa-layer-group"></i></span>
+                <span class="text-white font-semibold text-lg">
+                    თარო
+                </span>
+            </div>
+        </button>
+        <!-- Bottom: 2 cards side by side (each quarter height) -->
+        <div class="flex gap-6 flex-1 basis-1/2 min-h-0 h-1/2">
+            <!-- Lighting -->
+            <button
+                class="group relative w-1/2 h-full rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-blue-100 to-blue-50 transition-transform duration-200 flex items-end"
+                onclick="window.location.href='catalog.html?category=განათება';"
+            >
+                <img src="images/garunulilampa.jpg" alt="განათება"
+                     class="absolute inset-0 w-full h-full object-cover pointer-events-none transition-all duration-300 blur-sm group-hover:blur-0">
+                <div class="absolute bottom-0 left-0 w-full z-20 p-6 flex items-center bg-gradient-to-t from-black/40 via-black/10 to-transparent">
+                    <span class="text-blue-600 text-2xl mr-3"><i class="fas fa-lightbulb"></i></span>
+                    <span class="text-white font-semibold text-base">
+                        განათება
+                    </span>
+                </div>
+            </button>
+            <!-- Household -->
+            <button
+                class="group relative w-1/2 h-full rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-yellow-100 to-yellow-50 transition-transform duration-200 flex items-end"
+                onclick="window.location.href='catalog.html?category=საყოფაცხოვრებო';"
+            >
+                <img src="images/პირსახოცის საკიდი.png" alt="საყოფაცხოვრებო"
+                     class="absolute inset-0 w-full h-full object-cover pointer-events-none transition-all duration-300 blur-sm group-hover:blur-0">
+                <div class="absolute bottom-0 left-0 w-full z-20 p-6 flex flex-col items-center justify-center bg-gradient-to-t from-black/40 via-black/10 to-transparent">
+                    <span class="text-yellow-500 text-2xl mb-2"><i class="fas fa-home"></i></span>
+                    <span class="text-white font-semibold text-base text-center">
+                        საყოფაცხოვრებო
+                    </span>
+                </div>
+            </button>
+        </div>
+    </div>
+    <!-- For mobile/tablet: stack right cards below center card -->
+    <div class="flex flex-col gap-6 lg:hidden mt-8 w-full">
+        <!-- Top: Shelf (full width, aspect ratio for visual harmony) -->
+        <button
+            class="group relative w-full aspect-[2/1] rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-orange-100 to-orange-50 transition-transform duration-200 flex items-end"
+            onclick="window.location.href='catalog.html?category=თარო';"
+        >
+            <img src="images/თარო1.jpg" alt="თარო"
+                 class="absolute inset-0 w-full h-full object-cover pointer-events-none transition-all duration-300 blur-sm group-hover:blur-0">
+            <div class="absolute bottom-0 left-0 w-full z-20 p-6 flex items-center bg-gradient-to-t from-black/40 via-black/10 to-transparent">
+                <span class="text-cyronOrange text-3xl mr-4"><i class="fas fa-layer-group"></i></span>
+                <span class="text-white font-semibold text-lg">
+                    თარო
+                </span>
+            </div>
+        </button>
+        <!-- Lighting and Household stacked vertically, each with aspect ratio -->
+        <button
+            class="group relative w-full aspect-[2/1] rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-blue-100 to-blue-50 transition-transform duration-200 flex items-end"
+            onclick="window.location.href='catalog.html?category=განათება';"
+        >
+            <img src="images/garunulilampa.jpg" alt="განათება"
+                 class="absolute inset-0 w-full h-full object-cover pointer-events-none transition-all duration-300 blur-sm group-hover:blur-0">
+            <div class="absolute bottom-0 left-0 w-full z-20 p-6 flex items-center bg-gradient-to-t from-black/40 via-black/10 to-transparent">
+                <span class="text-blue-600 text-2xl mr-3"><i class="fas fa-lightbulb"></i></span>
+                <span class="text-white font-semibold text-base">
+                    განათება
+                </span>
+            </div>
+        </button>
+        <button
+            class="group relative w-full aspect-[2/1] rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-yellow-100 to-yellow-50 transition-transform duration-200 flex items-end"
+            onclick="window.location.href='catalog.html?category=საყოფაცხოვრებო';"
+        >
+            <img src="images/პირსახოცის საკიდი.png" alt="საყოფაცხოვრებო"
+                 class="absolute inset-0 w-full h-full object-cover pointer-events-none transition-all duration-300 blur-sm group-hover:blur-0">
+            <div class="absolute bottom-0 left-0 w-full z-20 p-6 flex flex-col items-center justify-center bg-gradient-to-t from-black/40 via-black/10 to-transparent">
+                <span class="text-yellow-500 text-2xl mb-2"><i class="fas fa-home"></i></span>
+                <span class="text-white font-semibold text-base text-center">
+                    საყოფაცხოვრებო
+                </span>
+            </div>
+        </button>
+    </div>
+<!-- ...existing code... -->
+<!-- Move "მეტი პროდუქტის ნახვა" button below the blocks -->
+</div>
+<!-- ...existing code... -->
+<!-- "მეტი პროდუქტის ნახვა" ღილაკი როგორც ბლოკი აიკონით და მწვანე ფონის სტილით -->
+<div class="mt-12">
+  <a href="catalog.html"
+     class="block w-full bg-cyronGreen rounded-2xl shadow-xl px-4 py-4 text-center flex flex-col items-center justify-center hover:bg-green-800 transition-all duration-200 hover:scale-105">
+    <span class="text-white text-xl font-bold">მეტი პროდუქტის ნახვა</span>
+  </a>
+</div>
+<!-- ...existing code... -->
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-gray-100">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">დაგვიკავშირდით</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">გაქვთ კითხვები? დაგვიკავშირდით</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">მოგვწერეთ</h3>
+                <form>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 mb-2">სახელი</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyronGreen focus:border-cyronGreen">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 mb-2">ელ.ფოსტა</label>
+                        <input type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyronGreen focus:border-cyronGreen">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 mb-2">თემა</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyronGreen focus:border-cyronGreen" placeholder="თემა">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 mb-2">შეტყობინება</label>
+                        <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyronGreen focus:border-cyronGreen" rows="5"></textarea>
+                    </div>
+                    <button type="submit" class="bg-cyronGreen hover:bg-green-800 text-white px-6 py-3 rounded-lg font-medium transition duration-300 w-full">
+                        გაგზავნა
+                    </button>
+                </form>
+            </div>
+            
+            <div>
+                <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6">საკონტაქტო ინფორმაცია</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="bg-cyronGreen bg-opacity-10 p-2 rounded-full mr-4">
+                                <i class="fas fa-envelope" style="color: #fff;"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">ელ.ფოსტა</h4>
+                                <p class="text-gray-600">info@cyron.ge</p>
+                                <p class="text-gray-600">orders@cyron.ge</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-cyronGreen bg-opacity-10 p-2 rounded-full mr-4">
+                                <i class="fas fa-phone-alt" style="color: #fff;"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">ტელეფონი</h4>
+                                <p class="text-gray-600">+995 598 17 31 30</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-cyronGreen bg-opacity-10 p-2 rounded-full mr-4">
+                                <i class="fas fa-map-marker-alt" style="color: #fff;"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">მისამართი</h4>
+                                <p class="text-gray-600">ქობალავას ქუჩა #14 </p>
+                                <p class="text-gray-600">Senaki, Georgia</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3036.998036405925!2d42.06799731535491!3d42.26956597936177!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x405c8d5b5c0e3a3d%3A0x3a4d1f4e8b5d5b5c!2sSenaki%2C%20Georgia!5e0!3m2!1sen!2sge!4v1629999999999!5m2!1sen!2sge" 
+                            width="100%" 
+                            height="300" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">CYRON</h3>
+                    <p class="text-gray-400 mb-4">პრემიუმ 3D ბეჭდვისა და მორგებული წარმოების სერვისები.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">მაღაზია</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">ყველა პროდუქტი</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">პოპულარული</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">ახალი პროდუქტები</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">მორგებული შეკვეთები</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">საჩუქრის ბარათები</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">მხარდაჭერა</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">ხშირად დასმული კითხვები</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">მიწოდების პოლიტიკა</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">დაბრუნება და გაცვლა</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">პროდუქტის მოვლა</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">დაგვიკავშირდით</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">სიახლეები</h4>
+                    <p class="text-gray-400 mb-4">გამოიწერეთ ახალი პროდუქტებისა და შეთავაზებების მისაღებად.</p>
+                    <div class="flex">
+                        <input type="email" placeholder="თქვენი ელ.ფოსტა" class="px-4 py-2 rounded-l-lg text-gray-900 w-full">
+                        <button class="bg-cyronOrange hover:bg-orange-700 px-4 py-2 rounded-r-lg">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2023 Cyron. ყველა უფლება დაცულია.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white">კონფიდენციალურობის პოლიტიკა</a>
+                    <a href="#" class="text-gray-400 hover:text-white">მომსახურების პირობები</a>
+                    <a href="#" class="text-gray-400 hover:text-white">კუკების პოლიტიკა</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Sidebar & Overlay (add this before </body>) -->
+<div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-300">
+    <div class="p-6 h-full flex flex-col">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold">თქვენი კალათა</h3>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="flex-grow overflow-y-auto mb-4">
+            <!-- Cart items will be rendered here -->
+        </div>
+        <div class="border-t border-gray-200 pt-4">
+            <div class="flex justify-between mb-2">
+                <span class="text-gray-600">ჯამი</span>
+                <span id="cart-subtotal" class="font-medium">0 &#8382;</span>
+            </div>
+            <div class="flex justify-between mb-4">
+                <span class="text-gray-600">მიწოდება</span>
+                <span class="font-medium">გამოითვლება გადახდისას</span>
+            </div>
+            <button class="w-full bg-cyronGreen hover:bg-green-800 text-white py-3 rounded-lg font-medium transition duration-300">
+                გადახდა
+            </button>
+            <p class="text-center text-sm text-gray-500 mt-2">ან <a href="deepsite.html" class="text-cyronGreen hover:underline">შოპინგის გაგრძელება</a></p>
+        </div>
+    </div>
+</div>
+<div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="toggleCart()"></div>
+
+<section id="cart-preview" class="max-w-2xl mx-auto my-8 bg-white rounded-xl shadow-xl p-6">
+    <h2 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-shopping-cart mr-2"></i> თქვენი კალათა</h2>
+    <div id="cart-preview-items"></div>
+    <div class="border-t border-gray-200 pt-4 mt-4">
+        <div class="flex justify-between mb-2">
+            <span class="text-gray-600">ჯამი</span>
+            <span id="cart-preview-subtotal" class="font-medium">0 &#8382;</span>
+        </div>
+        <a href="#" onclick="toggleCart();return false;" class="block w-full mt-4 bg-cyronGreen hover:bg-green-800 text-white py-3 rounded-lg font-medium text-center transition duration-300">კალათის ნახვა</a>
+    </div>
+</section>
+
+<script>
+    // Cart functionality
+        let cart = [];
+        let isGeorgian = false;
+        
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            updateCart();
+            
+            // Show confirmation
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-cyronGreen text-white px-4 py-2 rounded-lg shadow-lg flex items-center';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>${name} added to cart</span>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+        
+        function updateCart() {
+            const cartCount = document.getElementById('cart-count');
+            
+            // Update count
+            cartCount.textContent = cart.length;
+            cartCount.style.display = cart.length > 0 ? 'flex' : 'none';
+        }
+        
+        // Mobile menu
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('active');
+        }
+        
+        // Language switcher
+        function toggleLanguage() {
+            isGeorgian = !isGeorgian;
+            const languageElement = document.getElementById('current-language');
+            
+            if (isGeorgian) {
+                languageElement.textContent = 'GE';
+                // In a real implementation, you would translate all text to Georgian
+                // This is just a placeholder to show the functionality
+                document.querySelector('h1').textContent = 'მაღალი ხარისხის 3D-დაბეჭდილი პროდუქტები და პერსონალური ბეჭდვა თქვენთვის!';
+            } else {
+                languageElement.textContent = 'EN';
+                // Revert to English
+                document.querySelector('h1').textContent = 'High-quality 3D-printed products and custom prints made just for you!';
+            }
+        }
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const catalogModal = document.getElementById('catalog-modal');
+            
+            if (event.target === catalogModal) {
+                closeCatalog();
+            }
+        }
+        
+        // Language Switcher Logic
+        const langBtn = document.getElementById('lang-btn');
+        const langDropdown = document.getElementById('lang-dropdown');
+        const langCurrent = document.getElementById('current-language');
+        let currentLang = 'en';
+
+        langBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            langDropdown.classList.toggle('hidden');
+        });
+        document.addEventListener('click', function(e) {
+            if (!langDropdown.contains(e.target) && !langBtn.contains(e.target)) {
+                langDropdown.classList.add('hidden');
+            }
+        });
+        langDropdown.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const lang = btn.getAttribute('data-lang');
+                setLanguage(lang);
+                langDropdown.classList.add('hidden');
+            });
+        });
+
+        // Translation dictionary (full site, add more as needed)
+        const translations = {
+            ka: {
+                // Header/Nav
+                'Home': 'მთავარი',
+                'Products': 'პროდუქტები',
+                'Custom Order': 'მორგებული შეკვეთა',
+                'About': 'ჩვენს შესახებ',
+                'Contact': 'კონტაქტი',
+                // Hero
+                'High-quality 3D-დაბეჭდილი პროდუქტები და პერსონალური ბეჭდვა თქვენთვის!': 'მაღალი ხარისხის 3D-დაბეჭდილი პროდუქტები და პერსონალური ბეჭდვა თქვენთვის!',
+                'Discover our premium collection of 3D printed items or upload your own design for a personalized creation.': 'აღმოაჩინეთ ჩვენი პრემიუმ 3D პროდუქტები ან ატვირთეთ თქვენი დიზაინი პერსონალიზაციისთვის.',
+                'Browse Products': 'პროდუქტების ნახვა',
+                'Custom Order': 'მორგებული შეკვეთა',
+                // Featured Products
+                'Featured Products': 'რჩეული პროდუქტები',
+                'Explore our selection of premium 3D printed items': 'დაათვალიერეთ ჩვენი პრემიუმ 3D პროდუქტები',
+                'Geometric Vase': 'გეომეტრიული ვაზა',
+                'Modern decorative vase with intricate geometric patterns': 'თანამედროვე დეკორატიული ვაზა გეომეტრიული ორნამენტებით',
+                'Add to Cart': 'კალათში დამატება',
+                'Adjustable Phone Stand': 'რეგულირებადი ტელეფონის სადგამი',
+                'Ergonomic stand compatible with all smartphone sizes': 'ერგონომიული სადგამი ყველა ზომის სმარტფონისთვის',
+                'Minimalist Earrings': 'მინიმალისტური საყურეები',
+                'Lightweight and stylish earrings with smooth finish': 'მსუბუქი და თანამედროვე საყურეები გლუვი ზედაპირით',
+                'Show More Products': 'მეტი პროდუქტის ნახვა',
+                // About
+                'About Cyron': 'Cyron-ის შესახებ',
+                'Innovating the future of manufacturing, one layer at a time': 'ინოვაცია წარმოების მომავალში, თითოეული ფენით',
+                'Our Story': 'ჩვენი ისტორია',
+                'Founded in 2018 in Senaki, Georgia, Cyron began as a small workshop with a single 3D printer. Our passion for additive manufacturing and commitment to quality quickly helped us grow into a leading provider of 3D printing services in the region.': '2018 წელს სენაკში დაარსებული Cyron დაიწყო როგორც პატარა სახელოსნო ერთი 3D პრინტერით. ჩვენი ვნება და ხარისხზე ორიენტაცია დაგვეხმარა რეგიონში წამყვანი 3D სერვისის მომწოდებლად ჩამოყალიბებაში.',
+                'Today, we operate a state-of-the-art facility with industrial-grade printers capable of producing everything from small detailed models to large functional prototypes.': 'დღეს ჩვენ გვაქვს თანამედროვე საწარმო ინდუსტრიული პრინტერებით, რომლითაც ვბეჭდავთ როგორც პატარა დეტალებს, ასევე დიდ პროტოტიპებს.',
+                'Our Values': 'ჩვენი ღირებულებები',
+                'Sustainability': 'მდგრადობა',
+                'We use eco-friendly materials and minimize waste through precise manufacturing.': 'ვიყენებთ ეკო-მეგობრულ მასალებს და ვამცირებთ ნარჩენებს.',
+                'Innovation': 'ინოვაცია',
+                'Constantly exploring new materials, techniques, and applications for 3D printing.': 'მუდმივად ვიკვლევთ ახალ მასალებსა და ტექნოლოგიებს.',
+                'Quality': 'ხარისხი',
+                'Every product undergoes rigorous quality checks before reaching our customers.': 'ყოველი პროდუქტი გადის ხარისხის კონტროლს.',
+                'Eco-Friendly Approach': 'ეკო-მეგობრული მიდგომა',
+                "At Cyron, we're committed to sustainable manufacturing. Our 3D printing process generates significantly less waste than traditional manufacturing methods. We use biodegradable PLA filaments and recycle all support materials. For every order placed, we plant a tree through our partnership with local environmental organizations.": 'Cyron-ში ჩვენ ვზრუნავთ მდგრად წარმოებაზე. 3D ბეჭდვა მნიშვნელოვნად ამცირებს ნარჩენებს. ვიყენებთ ბიოდეგრადირებად PLA-ს და ვახდენთ მასალების გადამუშავებას. ყოველი შეკვეთისთვის ვრგავთ ერთ ხეს.',
+                'Less material waste': 'ნაკლები ნარჩენი',
+                'Biodegradable options': 'ბიოდეგრადირებადი არჩევანი',
+                'Trees planted': 'დარგული ხეები',
+                // Contact
+                'Contact Us': 'დაგვიკავშირდით',
+                'Have questions? Get in touch with our team': 'გაქვთ კითხვები? დაგვიკავშირდით',
+                'Send Us a Message': 'მოგვწერეთ',
+                'Name': 'სახელი',
+                'Email': 'ელ.ფოსტა',
+                'Subject': 'თემა',
+                'General Inquiry': 'ზოგადი კითხვა',
+                'Custom Order Question': 'მორგებული შეკვეთის კითხვა',
+                'Product Support': 'პროდუქტის მხარდაჭერა',
+                'Wholesale Inquiry': 'საბითუმო შეკითხვა',
+                'Other': 'სხვა',
+                'Message': 'შეტყობინება',
+                'Send Message': 'გაგზავნა',
+                'Contact Information': 'საკონტაქტო ინფორმაცია',
+                'Phone': 'ტელეფონი',
+                'Address': 'მისამართი',
+                // Footer
+                'Premium 3D printing solutions and custom manufacturing services.': 'პრემიუმ 3D ბეჭდვისა და მორგებული წარმოების სერვისები.',
+                'Shop': 'მაღაზია',
+                'All Products': 'ყველა პროდუქტი',
+                'Best Sellers': 'პოპულარული',
+                'New Arrivals': 'ახალი პროდუქტები',
+                'Custom Orders': 'მორგებული შეკვეთები',
+                'Gift Cards': 'საჩუქრის ბარათები',
+                'Support': 'მხარდაჭერა',
+                'FAQs': 'ხშირად დასმული კითხვები',
+                'Shipping Policy': 'მიწოდების პოლიტიკა',
+                'Returns & Exchanges': 'დაბრუნება და გაცვლა',
+                'Product Care': 'პროდუქტის მოვლა',
+                'Contact Us': 'დაგვიკავშირდით',
+                'Newsletter': 'სიახლეები',
+                'Subscribe to get updates on new products and special offers.': 'გამოიწერეთ ახალი პროდუქტებისა და შეთავაზებების მისაღებად.',
+                'Your email': 'თქვენი ელ.ფოსტა',
+                // Cart
+                'Your Cart': 'თქვენი კალათა',
+                'Subtotal': 'ჯამი',
+                'Shipping': 'მიწოდება',
+                'Calculated at checkout': 'გამოითვლება გადახდისას',
+                'Proceed to Checkout': 'გადახდა',
+                'continue shopping': 'შოპინგის გაგრძელება',
+                'Your cart is empty': 'კალათა ცარიელია',
+                // Catalog Modal
+                'Product Catalog': 'პროდუქტების კატალოგი',
+                'Search': 'ძებნა',
+                'Search products...': 'პროდუქტის ძებნა...',
+                'Category': 'კატეგორია',
+                'All Categories': 'ყველა კატეგორია',
+                'Home & Decor': 'სახლის დეკორი',
+                'Jewelry': 'სამკაული',
+                'Tech Accessories': 'ტექნოლოგიური აქსესუარები',
+                'Toys & Games': 'სათამაშოები და თამაშები',
+                'Art & Sculptures': 'ხელოვნება და სკულპტურა',
+                'Price Range': 'ფასის დიაპაზონი',
+                'All Prices': 'ყველა ფასი',
+                'Under $10': '10$-მდე',
+                '$10 - $25': '10$ - 25$',
+                '$25 - $50': '25$ - 50$',
+                'Over $50': '50$-ზე მეტი',
+                'Sort By': 'დალაგება',
+                'Featured': 'რჩეული',
+                'Price: Low to High': 'ფასი: ზრდადობით',
+                'Price: High to Low': 'ფასი: კლებადობით',
+                'Newest': 'ახალი',
+                'Best Selling': 'ყველაზე გაყიდვადი',
+                'Load More Products': 'მეტი პროდუქტის ჩატვირთვა',
+                // ...add more as needed...
+            }
+        };
+
+        // Translate all text nodes in the DOM
+        function translateAll(lang) {
+            function translateNode(node) {
+                if (node.nodeType === 3) { // Text node
+                    const text = node.nodeValue.trim();
+                    if (text && translations[lang] && translations[lang][text]) {
+                        node.nodeValue = node.nodeValue.replace(text, translations[lang][text]);
+                    }
+                } else if (node.nodeType === 1) { // Element
+                    // Translate attributes
+                    if (node.hasAttribute('placeholder')) {
+                        const placeholder = node.getAttribute('placeholder').trim();
+                        if (placeholder && translations[lang][placeholder]) {
+                            node.setAttribute('placeholder', translations[lang][placeholder]);
+                        }
+                    }
+                    if (node.hasAttribute('value')) {
+                        const value = node.getAttribute('value').trim();
+                        if (value && translations[lang][value]) {
+                            node.setAttribute('value', translations[lang][value]);
+                        }
+                    }
+                    // Translate button value/text
+                    if (node.tagName === 'BUTTON' || node.tagName === 'A' || node.tagName === 'OPTION' || node.tagName === 'LABEL' || node.tagName === 'H2' || node.tagName === 'H3' || node.tagName === 'H4' || node.tagName === 'SPAN' || node.tagName === 'P') {
+                        const btnText = node.textContent.trim();
+                        if (translations[lang][btnText]) {
+                            node.textContent = translations[lang][btnText];
+                        }
+                    }
+                    // Recursively translate child nodes
+                    node.childNodes.forEach(translateNode);
+                }
+            }
+            document.body.childNodes.forEach(translateNode);
+            langCurrent.textContent = lang === 'ka' ? 'GE' : 'EN';
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            translateAll(lang);
+        }
+
+        // On page load, update cart count from localStorage if available
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedCart = localStorage.getItem('cart');
+            if (storedCart) {
+                cart = JSON.parse(storedCart);
+                updateCart();
+            }
+        });
+        // Save cart to localStorage on change
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+            // Show confirmation
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-cyronGreen text-white px-4 py-2 rounded-lg shadow-lg flex items-center';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>${name} added to cart</span>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+
+    // Cart preview logic for main page
+    function renderCartPreview() {
+        const cartPreviewItems = document.getElementById('cart-preview-items');
+        const cartPreviewSubtotal = document.getElementById('cart-preview-subtotal');
+        let cart = [];
+        try {
+            cart = JSON.parse(localStorage.getItem('cart')) || [];
+        } catch { cart = []; }
+        if (cartPreviewItems && cartPreviewSubtotal) {
+            if (cart.length > 0) {
+                let itemsHTML = '';
+                let subtotal = 0;
+                cart.forEach(item => {
+                    if (!item.qty) item.qty = 1;
+                    subtotal += Number(item.price) * item.qty;
+                    itemsHTML += `
+                        <div class="flex items-center py-2 border-b border-gray-100">
+                            <div class="w-10 h-10 bg-gray-100 rounded-lg mr-3 flex items-center justify-center overflow-hidden">
+                                <i class="fas fa-cube text-gray-400 text-lg"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <span class="font-medium text-gray-800">${item.name}</span>
+                                <span class="ml-2 text-gray-500 text-sm">x${item.qty || 1}</span>
+                            </div>
+                            <span class="text-gray-700 font-medium">${(Number(item.price) * (item.qty || 1)).toFixed(2)} &#8382;</span>
+                        </div>
+                    `;
+                });
+                cartPreviewItems.innerHTML = itemsHTML;
+                cartPreviewSubtotal.innerHTML = `${subtotal.toFixed(2)} &#8382;`;
+            } else {
+                cartPreviewItems.innerHTML = `<div class="text-center text-gray-400 py-8">კალათა ცარიელია</div>`;
+                cartPreviewSubtotal.innerHTML = '0 &#8382;';
+            }
+        }
+    }
+
+    // Call on load and when cart changes
+    document.addEventListener('DOMContentLoaded', function() {
+        // ...existing code...
+        renderCartPreview();
+    });
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'cart') {
+            renderCartPreview();
+        }
+    });
+
+    // Also call renderCartPreview after addToCart, removeFromCart, etc. if you use those functions
+
+    // ...existing code...
+</script>
+<script>
+// --- Cart logic for all pages (sessionStorage based, like catalog.html/custom-order.html) ---
+function getCart() {
+    const stored = sessionStorage.getItem('cart');
+    return stored ? JSON.parse(stored) : [];
+}
+function setCart(cart) {
+    sessionStorage.setItem('cart', JSON.stringify(cart));
+}
+function updateCartCount() {
+    let cart = getCart();
+    let cartCount = document.getElementById('cart-count');
+    if (cartCount) {
+        cartCount.textContent = cart.length;
+        cartCount.style.display = cart.length > 0 ? 'flex' : 'none';
+    }
+}
+function toggleCart() {
+    const sidebar = document.getElementById('cart-sidebar');
+    const overlay = document.getElementById('cart-overlay');
+    if (sidebar && overlay) {
+        const isOpen = !sidebar.classList.contains('translate-x-full');
+        if (isOpen) {
+            sidebar.classList.add('translate-x-full');
+            overlay.classList.add('hidden');
+        } else {
+            sidebar.classList.remove('translate-x-full');
+            overlay.classList.remove('hidden');
+            renderCartSidebar();
+        }
+    }
+}
+function renderCartSidebar() {
+    const cartItems = document.getElementById('cart-items');
+    const cartSubtotal = document.getElementById('cart-subtotal');
+    let cart = getCart();
+    if (cartItems && cartSubtotal) {
+        if (cart.length > 0) {
+            let itemsHTML = '';
+            let subtotal = 0;
+            cart.forEach((item, idx) => {
+                if (!item.qty) item.qty = 1;
+                subtotal += Number(item.price) * item.qty;
+                itemsHTML += `
+                    <div class="flex items-center py-4 border-b border-gray-200">
+                        <div class="w-16 h-16 bg-gray-100 rounded-lg mr-4 flex items-center justify-center overflow-hidden">
+                            <i class="fas fa-cube text-gray-400 text-2xl"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-medium text-gray-800">${item.name}</h4>
+                            <div class="flex items-center mt-2">
+                                <button class="px-2 py-1 text-lg text-gray-700 border border-gray-300 rounded-l hover:bg-gray-100" onclick="changeCartQty(${idx}, -1)">-</button>
+                                <span class="px-3 py-1 border-t border-b border-gray-300 text-gray-800 bg-white">${item.qty}</span>
+                                <button class="px-2 py-1 text-lg text-gray-700 border border-gray-300 rounded-r hover:bg-gray-100" onclick="changeCartQty(${idx}, 1)">+</button>
+                            </div>
+                            <div class="text-sm text-gray-600 mt-2">ფასი: ${(Number(item.price) * item.qty).toFixed(2)} &#8382;</div>
+                        </div>
+                        <button class="text-gray-500 hover:text-red-500 ml-2" onclick="removeFromCart(${idx}); event.stopPropagation();">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            cartItems.innerHTML = itemsHTML;
+            cartSubtotal.innerHTML = `${subtotal.toFixed(2)} &#8382;`;
+        } else {
+            cartItems.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-shopping-cart text-4xl mb-4"></i>
+                    <p>კალათა ცარიელია</p>
+                </div>
+            `;
+            cartSubtotal.innerHTML = '0 &#8382;';
+        }
+    }
+}
+function changeCartQty(idx, delta) {
+    let cart = getCart();
+    if (!cart[idx].qty) cart[idx].qty = 1;
+    cart[idx].qty += delta;
+    if (cart[idx].qty < 1) cart[idx].qty = 1;
+    setCart(cart);
+    updateCartCount();
+    renderCartSidebar();
+}
+function removeFromCart(idx) {
+    let cart = getCart();
+    cart.splice(idx, 1);
+    setCart(cart);
+    updateCartCount();
+    renderCartSidebar();
+}
+document.addEventListener('DOMContentLoaded', function() {
+    updateCartCount();
+    renderCartSidebar();
+});
+</script>
+<!-- Slide-in animation for main sections on page load -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const hero = document.querySelector('section.bg-gradient-to-r');
+        const products = document.getElementById('products');
+        const contact = document.getElementById('contact');
+        if (hero && products && contact) {
+            hero.style.opacity = '0';
+            hero.style.transform = 'translateY(-40px)';
+            products.style.opacity = '0';
+            products.style.transform = 'translateY(40px)';
+            contact.style.opacity = '0';
+            contact.style.transform = 'translateY(40px)';
+            setTimeout(() => {
+                hero.style.transition = 'opacity 0.5s, transform 0.5s';
+                hero.style.opacity = '1';
+                hero.style.transform = 'translateY(0)';
+                setTimeout(() => {
+                    products.style.transition = 'opacity 0.5s 0.1s, transform 0.5s 0.1s';
+                    products.style.opacity = '1';
+                    products.style.transform = 'translateY(0)';
+                    setTimeout(() => {
+                        contact.style.transition = 'opacity 0.5s 0.2s, transform 0.5s 0.2s';
+                        contact.style.opacity = '1';
+                        contact.style.transform = 'translateY(0)';
+                    }, 100);
+                }, 100);
+            }, 10);
+        }
+    });
+
+    // Smooth scroll to top with animation when clicking logo in navbar
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoLink = document.querySelector('header a.flex.items-center');
+        if (logoLink) {
+            logoLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+        // Smooth scroll to top when clicking "მთავარი" nav link
+        const homeLink = document.getElementById('nav-home-link');
+        if (homeLink) {
+            homeLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+    });
+</script>
+</body>
+</html>
