@@ -54,6 +54,10 @@
                 z-index: 50;
             }
         }
+        .slider-img {
+            transition: opacity 0.4s, transform 0.4s;
+            /* overlayed images for slider */
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -269,7 +273,7 @@
     // Product data (should match product.json)
     const products = [
         { name: "გრავიტაციული საკიდი", description: "ლამაზი პროდუქტი", price: 25, image: "images/გრავიტაციული საკიდი.jpg", category: "საყოფაცხოვრებო", specs: "მასალა: პლასტმასი, ზომა: 20x10სმ" },
-        { name: "ოვალური ლამფა", description: "ლამაზი პროდუქტი", price: 80, image: "images/garunulilampa.jpg", category: "განათება", specs: "სიმძლავრე: 5W" },
+        { name: "ოვალური ლამფა", description: "ლამაზი პროდუქტი", price: 80, image: "images/garunulilampa11.png", category: "განათება", specs: "სიმძლავრე: 5W" }, // შეცვლილია
         { name: "თაროს სამაგრი", description: "ლამაზი პროდუქტი", price: 25, image: "images/თარო1.jpg", category: "თარო" },
         { name: "უჯრის ორგანიზატორი", description: "ლამაზი პროდუქტი", price: 25, image: "images/უჯრის ორგანიზატორი.jpg", category: "საყოფაცხოვრებო" },
         { name: "პირსახოცის საკიდი", description: "კარგი ხარისხი", price: 35, image: "images/პირსახოცის საკიდი.png", category: "საყოფაცხოვრებო" },
@@ -295,11 +299,15 @@
             return;
         }
         filtered.forEach(product => {
+            // Show garunulilampa11.png for ოვალური ლამფა in grid only
+            const cardImage = (product.name === "ოვალური ლამფა")
+                ? "images/garunulilampa11.png"
+                : product.image;
             grid.innerHTML += `
                 <div class="product-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300 flex flex-col cursor-pointer group" 
                     onclick="if(event.target.closest('button'))return;openProductModal('${product.name.replace(/'/g,"\\'")}')">
                     <div class="h-48 bg-gray-100 flex items-center justify-center">
-                        <img src="${product.image}" alt="${product.name}" class="h-full w-full object-cover">
+                        <img src="${cardImage}" alt="${product.name}" class="h-full w-full object-cover">
                     </div>
                     <div class="p-4 flex flex-col flex-1">
                         <h3 class="text-lg font-semibold text-gray-800 mb-2">${product.name}</h3>
@@ -329,7 +337,105 @@
         const inner = document.getElementById('product-modal-inner');
         const content = document.getElementById('product-modal-content');
 
-        // Fill modal content: image above title
+        // --- ოვალური ლამფა: სლაიდერი ---
+        if (product.name === "ოვალური ლამფა") {
+            // სურათების მასივი
+            const images = ["images/garunulilampa1.png", "images/garunulilampa.jpg"];
+            let sliderIdx = 0;
+
+            // სლაიდერის html
+            content.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <div class="relative w-64 h-64 mb-4">
+                        <img id="modal-fly-image" src="${images[0]}" alt="${product.name}" class="w-64 h-64 object-cover rounded-lg border border-gray-200 opacity-0 transition-all duration-500 slider-img" style="position:absolute;left:0;top:0;">
+                        <img id="modal-fly-image-2" src="${images[1]}" alt="${product.name}" class="w-64 h-64 object-cover rounded-lg border border-gray-200 opacity-0 transition-all duration-500 slider-img" style="position:absolute;left:0;top:0;">
+                        <button id="slider-left" class="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 hover:bg-opacity-100 rounded-full p-2 shadow transition" style="z-index:2;">
+                            <i class="fas fa-chevron-left text-xl text-gray-700"></i>
+                        </button>
+                        <button id="slider-right" class="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-70 hover:bg-opacity-100 rounded-full p-2 shadow transition" style="z-index:2;">
+                            <i class="fas fa-chevron-right text-xl text-gray-700"></i>
+                        </button>
+                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+                            <span class="slider-dot w-2 h-2 rounded-full bg-cyronGreen opacity-80" style="display:inline-block;"></span>
+                            <span class="slider-dot w-2 h-2 rounded-full bg-gray-300 opacity-80" style="display:inline-block;"></span>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-2 text-center">${product.name}</h2>
+                    <p class="text-gray-700 mb-2 text-center">${product.description}</p>
+                    <div class="text-lg font-semibold text-cyronGreen mb-2">${Number(product.price).toFixed(2)} &#8382;</div>
+                    <div class="mb-4 text-gray-600 text-sm text-center">სპეციფიკაციები: ${product.specs ? product.specs : "---"}</div>
+                    <button 
+                        class="px-6 py-2 rounded-lg text-base transition duration-300 text-white font-semibold mb-2"
+                        style="background-image: url('images/logo/backgrcopy.png'); background-size: cover; background-position: center; background-repeat: no-repeat; border: none;"
+                        onclick="addToCartAndGo('${product.name.replace(/'/g,"\\'")}', ${product.price})"
+                    >
+                        კალათაში დამატე
+                    </button>
+                </div>
+            `;
+
+            overlay.classList.remove('hidden');
+            modal.classList.remove('hidden');
+
+            // Animate modal in
+            inner.style.opacity = '0';
+            inner.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                inner.style.transition = 'opacity 0.3s, transform 0.3s';
+                inner.style.opacity = '1';
+                inner.style.transform = 'scale(1)';
+            }, 10);
+
+            // Animate first image in
+            setTimeout(() => {
+                document.getElementById('modal-fly-image').style.opacity = '1';
+            }, 110);
+
+            // სლაიდერის ფუნქცია
+            function showSlide(idx, direction = 0) {
+                const img1 = document.getElementById('modal-fly-image');
+                const img2 = document.getElementById('modal-fly-image-2');
+                const dots = content.querySelectorAll('.slider-dot');
+                // Animate out current
+                [img1, img2].forEach((img, i) => {
+                    img.style.transition = 'opacity 0.4s, transform 0.4s';
+                    img.style.opacity = (i === idx) ? '1' : '0';
+                    img.style.zIndex = (i === idx) ? '1' : '0';
+                    img.style.transform = (direction === 0) ? 'scale(1)' : (i === idx ? 'scale(1.04)' : 'scale(0.98)');
+                });
+                // Update dots
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('bg-cyronGreen', i === idx);
+                    dot.classList.toggle('bg-gray-300', i !== idx);
+                });
+            }
+            // Left/right click
+            content.querySelector('#slider-left').onclick = function(e) {
+                e.stopPropagation();
+                sliderIdx = (sliderIdx + images.length - 1) % images.length;
+                showSlide(sliderIdx, -1);
+            };
+            content.querySelector('#slider-right').onclick = function(e) {
+                e.stopPropagation();
+                sliderIdx = (sliderIdx + 1) % images.length;
+                showSlide(sliderIdx, 1);
+            };
+            // Dot click
+            content.querySelectorAll('.slider-dot').forEach((dot, i) => {
+                dot.onclick = function(e) {
+                    e.stopPropagation();
+                    sliderIdx = i;
+                    showSlide(sliderIdx, 0);
+                };
+            });
+            // დასაწყისში პირველი
+            showSlide(0);
+
+            document.body.style.overflow = 'hidden';
+            return;
+        }
+
+        // --- სხვა პროდუქტები ---
         content.innerHTML = `
             <div class="flex flex-col items-center">
                 <img id="modal-fly-image" src="${product.image}" alt="${product.name}" class="w-64 h-64 object-cover rounded-lg mb-4 border border-gray-200 opacity-0 transition-all duration-500" style="margin-top:0;">
